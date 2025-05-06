@@ -1,0 +1,388 @@
+
+<!-- popup.html -->
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="stylesheet" href="assets/css/bootstrap.min.css">
+  <link rel="stylesheet" href="assets/css/custom.css">
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" rel="stylesheet">
+  <!-- Include jQuery before Bootstrap (for Bootstrap 4 or lower) -->
+  <script src="assets/js/jquery-3.6.0.min.js"></script>
+
+  <title>SIP Extension</title>
+  <style>
+    .hidden { display: none; }
+  </style>
+</head>
+<body>
+  <div id="step1" class="container">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header text-center bg-primary text-white">
+            <h3>Login</h3>
+          </div>
+          <div class="card-body">
+            <form id="loginForm">
+              <div class="mb-3">
+                <label for="extension" class="form-label">Extension</label>
+                <input
+                  type="text"
+                  id="extension"
+                  class="form-control"
+                  placeholder="Enter your extension"
+                  required
+                />
+              </div>
+              <div class="mb-3">
+                <label for="password" class="form-label">Password</label>
+                <input
+                  type="password"
+                  id="password"
+                  class="form-control"
+                  placeholder="Enter your password"
+                  required
+                />
+              </div>
+              <audio id="remoteAudio" autoplay></audio>
+              <button type="button" id="next1" class="btn btn-primary w-100">
+                Next
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="step2" class="container hidden">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header text-center bg-primary text-white">
+            <h3>Host Configuration</h3>
+          </div>
+          <div class="card-body">
+            <form>
+              <div class="mb-3">
+                <label for="hostname" class="form-label">Hostname</label>
+                <input
+                  type="text"
+                  id="hostname"
+                  class="form-control"
+                  placeholder="Enter SIP server hostname"
+                  required
+                />
+              </div>
+              <button type="button" id="next2" class="btn btn-primary w-100">
+                Next
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="step3" class="container hidden">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header text-center bg-primary text-white">
+            <h3>Configure Port</h3>
+          </div>
+          <div class="card-body">
+            <form>
+              <div class="mb-3">
+                <label for="port" class="form-label">Port</label>
+                <input
+                  type="text"
+                  id="port"
+                  class="form-control"
+                  placeholder="Enter Port"
+                  required
+                />
+              </div>
+              <button type="button" id="connect" class="btn btn-primary w-100">
+                Connect
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="postLogin" class="container hidden">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header text-center bg-primary text-white">
+            <h3>Dialer</h3>
+          </div>
+          <div class="card-body">
+            <form>
+              <div class="mb-3">
+                <div class="input-group">
+                  <!-- Phone Number Input -->
+                  <input
+                    type="text"
+                    id="dialNumber"
+                    class="form-control"
+                    placeholder="Enter Phone Number"
+                    readonly
+                  />
+            
+                  <!-- Dial Pad Icon -->
+                  <span class="input-group-text" id="dialpadIcon" title="Keypad">
+                    <i class="fa fa-keyboard"></i>
+                  </span>
+                  <!-- Clear Last Digit Icon -->
+                  <span class="input-group-text" id="clearLastDigit" title="Clear last digit">
+                    <i class="fa fa-times"></i>
+                  </span>
+                  <!-- New Button for Opening Dialog Box -->
+                  <span class="input-group-text" id="openCreateDialog" title="Create Contact">
+                    <i class="fa fa-pencil-alt"></i>
+                  </span>
+                  <!-- Modal Dialog Box -->
+                  <div class="modal fade" id="apiKeyModal" tabindex="-1" aria-labelledby="apiKeyModalLabel" aria-hidden="true">
+                    <div class="modal-dialog">
+                      <div class="modal-content">
+                        <div class="modal-header">
+                          <h5 class="modal-title" id="apiKeyModalLabel">Enter API Key</h5>
+                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                          </div>
+                          <div class="modal-body">
+                            <form id="apiKeyForm">
+                              <div class="mb-3">
+                                <label for="apiKeyInput" class="form-label">API Key</label>
+                                <textarea class="form-control" id="apiKeyInput" placeholder="Enter API Key" required></textarea>
+                              </div>
+                              <div class="modal-footer">
+                                <button type="button" class="btn btn-primary" id="fetchContactGroups">Fetch Contact Groups</button>
+                              </div>
+                              <div class="mb-3">
+                                <label for="contactGroupSelect" class="form-label">Contact Group</label>
+                                  <select class="form-control" id="contactGroupSelect">
+                                    <option value="">Select a Contact Group</option>
+                                  </select>
+                              </div>
+                              <!-- Import Button -->
+                              <div class="mb-3">
+                                <button type="button" class="btn btn-success" id="importContacts" disabled>Import</button>
+                              </div>
+                            </form>
+                          </div>
+                          <!-- <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                          </div> -->
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Numeric Keypad -->
+              <div id="keypadContainer" class="text-center mb-3 hidden">
+                <div class="row gx-1 gy-1 keypaddiv" id="keypad">
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="1">1</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="2">2</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="3">3</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="4">4</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="5">5</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="6">6</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="7">7</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="8">8</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="9">9</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="*">*</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="0">0</button>
+                  </div>
+                  <div class="col-4">
+                    <button type="button" class="btn btn-secondary round-button" data-value="#">#</button>
+                  </div>
+                </div>
+              </div>
+              <div class="text-center mb-3">
+                <div class="row gx-1 gy-1" id="keypad">
+                  <div class="col-6">
+                    <button type="button" id="dial" class="btn btn-success w-100">
+                      📞
+                    </button>
+                  </div>
+                  <div class="col-6">
+                    <button type="button" class="btn btn-danger w-100" id="clearButton">
+                      Clear
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <!-- Contact table -->
+              <table class="table table-bordered table-striped mt-3">
+                <thead class="table-dark">
+                  <tr>
+                    <th>Name</th>
+                    <th>Number</th>
+                  </tr>
+                </thead>
+                <tbody id="contactList">
+                  <tr>
+                    <td>Test</td>
+                    <td>
+                      <a href="#" class="extension" data-extension="923047120820">923047120820</a>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>Trunk</td>
+                    <td>
+                      <a href="#" class="extension" data-extension="12132942943">12132942943</a>
+                    </td>
+                  </tr>
+                  <!-- <tr>
+                    <td>Charlie</td>
+                    <td>
+                      <a href="#" class="extension" data-extension="1003">1003</a>
+                    </td>
+                  </tr> -->
+                </tbody>
+              </table>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="callSection" class="container hidden">
+    <div class="row justify-content-center">
+      <div class="col-md-6">
+        <div class="card">
+          <div class="card-header text-center bg-primary text-white">
+            <h3>Outgoing</h3>
+          </div>
+          <div class="card-body">
+            <form>
+              <!-- Caller Info Section -->
+              <div class="caller-info text-center mb-3">
+                <strong id="callerNumber" class="h4"></strong><br>
+                <span id="callerDomain" class="text-muted"></span>
+                <span id="callStatus" class="text-muted"></span>
+              </div>
+  
+              <!-- Call Duration -->
+              <div class="call-duration text-center mb-4">
+                <h2 id="callDuration" class="text-danger">00:00</h2>
+              </div>
+              
+              <!-- Gap After Timer -->
+              <div style="height: 200px;"></div>
+  
+              <!-- Action Buttons Section -->
+              <div class="action-buttons d-flex justify-content-around mt-4">
+                <button type="button" id="holdButton" class="btn btn-light btn-lg">
+                  <i class="fas fa-pause-circle"></i> <!-- Hold Icon -->
+                </button>
+                <button type="button" id="callDialPad" class="btn btn-light btn-lg">
+                  <i class="fas fa-keyboard"></i> <!-- Dial Pad Icon -->
+                </button>
+              </div>
+
+              <div class="extra-buttons d-flex justify-content-around mt-4">
+                <button type="button" id="endCallButton" class="btn btn-danger btn-lg">
+                  <i class="fas fa-phone-slash"></i> <!-- End Call Icon -->
+                </button>
+                <!-- TODO Video Call Icon -->
+                <!-- <button type="button" class="btn btn-light btn-lg">
+                  <i class="fas fa-video"></i>
+                </button> -->
+              </div>
+              <!-- Dial Pad Modal (hidden initially) -->
+              <div id="dialPadModal" class="modal fade" tabindex="-1" aria-labelledby="dialPadModalLabel" aria-hidden="true">
+                <div class="modal-dialog">
+                  <div class="modal-content">
+                    <div class="modal-header">
+                      <h5 class="modal-title" id="dialPadModalLabel">Dial Pad</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                      </div>
+                      <div class="modal-body text-center mb-3">
+                        <div class="dialpad row gx-1 gy-1 keypaddiv" id="keypad">
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="1">1</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="2">2</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="3">3</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="4">4</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="5">5</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="6">6</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="7">7</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="8">8</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="9">9</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="*">*</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="0">0</button>
+                          </div>
+                          <div class="col-4">
+                            <button type="button" class="round-button dialpad-btn" data-number="#">#</button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>  
+  
+  <!-- <script src="assets/js/dialer.js"></script>   -->
+  <script src="assets/js/bootstrap.min.js"></script>
+  <!-- <script src="assets/js/jssip.min.js"></script> -->
+  <script src="assets/js/sip-0.21.2.min.js"></script>
+  <script src="popup.js"></script>
+
+</body>
+</html>
